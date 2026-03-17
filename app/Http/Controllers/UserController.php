@@ -24,9 +24,7 @@ class UserController extends Controller
         return redirect('/');
     }
 
-    public function dashboard(){
-        return view('dashboard');
-    }
+  
 
     public function register(Request $request){
         $incomingFields = $request->validate([
