@@ -6,7 +6,12 @@ use App\Models\Post;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    $posts = Post::where('user_id', auth()->id())->get();
+    $posts = [];
+    if(auth()->check()){
+       $posts = auth() -> user() -> usersCoolPosts()->latest()->get();
+    }
+    
+    //$posts = Post::where('user_id', auth()->id())->get();
     return view('home', ['posts' => $posts]);
 });
 
