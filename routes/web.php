@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\UserController;
-use App\Models\Post;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -23,3 +22,5 @@ Route::post('/login', [UserController::class, 'login']);
 
 
 Route::post('/create-post',[PostController::class, 'createPost']);
+
+Route::get('/edit-post/{post}', [PostController::class, 'showEditScreen']);
