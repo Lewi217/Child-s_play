@@ -10,21 +10,21 @@ services:
       - .:/var/www
       - ./storage:/var/www/storage
     ports:
-      - "8000:80"
+      - "${APP_PORT}:80"
     environment:
-      APP_ENV: local
-      APP_KEY: base64:Qwn4iFyM9gY/OYhZDxZd/l5EJaFoW7YsfsO91qUWHUE=
-      APP_DEBUG: "true"
-      APP_URL: http://localhost:8000
-      DB_CONNECTION: pgsql
-      DB_HOST: db
-      DB_PORT: 5432
-      DB_DATABASE: childs_play
-      DB_USERNAME: lewis
-      DB_PASSWORD: gakpo901
-      SESSION_DRIVER: database
-      CACHE_STORE: database
-      QUEUE_CONNECTION: database
+      APP_ENV: ${APP_ENV}
+      APP_KEY: ${APP_KEY}
+      APP_DEBUG: ${APP_DEBUG}
+      APP_URL: ${APP_URL}
+      DB_CONNECTION: ${DB_CONNECTION}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      SESSION_DRIVER: ${SESSION_DRIVER}
+      CACHE_STORE: ${CACHE_STORE}
+      QUEUE_CONNECTION: ${QUEUE_CONNECTION}
     depends_on:
       db:
         condition: service_healthy
@@ -36,15 +36,15 @@ services:
     container_name: childs_play_db
     restart: unless-stopped
     environment:
-      POSTGRES_DB: childs_play
-      POSTGRES_USER: lewis
-      POSTGRES_PASSWORD: gakpo901
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "${DB_PORT}:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U lewis -d childs_play"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_DATABASE}"]
       interval: 10s
       timeout: 5s
       retries: 5
