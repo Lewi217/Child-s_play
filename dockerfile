@@ -1,4 +1,4 @@
-FROM php:8.2-fpm
+FROM php:8.4-fpm
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -39,4 +39,4 @@ COPY docker/nginx.conf /etc/nginx/sites-available/default
 EXPOSE 80
 
 # Start Nginx + PHP-FPM
-CMD service nginx start && php-fpm
+CMD php-fpm -D && nginx -g 'daemon off;'
