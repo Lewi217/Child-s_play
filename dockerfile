@@ -1,5 +1,8 @@
 FROM php:8.4-fpm
 
+# Build arg: set to "true" when building for tests (includes PHPUnit etc.)
+ARG INSTALL_DEV=false
+
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     git \
@@ -15,28 +18,49 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+# Install Node.js (for Vite/Tailwind asset compilation)
+RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
+    && apt-get install -y nodejs \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Set working directory
 WORKDIR /var/www
 
-# Copy project files
-COPY . .
+# Copy only dependency manifests first (better layer caching)
+COPY composer.json composer.lock ./
+COPY package.json package-lock.json* ./
 
 # Install PHP dependencies
-RUN composer install --optimize-autoloader --no-dev
+RUN if [ "$INSTALL_DEV" = "true" ]; then \
+        composer install --optimize-autoloader; \
+    else \
+        composer install --optimize-autoloader --no-dev; \
+    fi
+
+# Install Node dependencies and build frontend assets
+RUN npm ci --ignore-scripts
+COPY resources/ resources/
+COPY vite.config.js ./
+RUN npm run build
+
+# Copy the rest of the application
+COPY . .
 
 # Set permissions
 RUN chown -R www-data:www-data /var/www \
     && chmod -R 755 /var/www/storage \
     && chmod -R 755 /var/www/bootstrap/cache
 
-# Copy Nginx config
+# Copy Nginx config and entrypoint
 COPY docker/nginx.conf /etc/nginx/sites-available/default
+COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
 
 # Expose port 80
 EXPOSE 80
 
-# Start Nginx + PHP-FPM
-CMD php-fpm -D && nginx -g 'daemon off;'
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
