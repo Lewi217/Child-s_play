@@ -4,8 +4,7 @@ services:
       context: .
       dockerfile: dockerfile
       args:
-        INSTALL_DEV: "true"      # include PHPUnit and other dev deps
-    environment:
+        INSTALL_DEV: "true"      
       APP_ENV: testing
       APP_KEY: base64:dGVzdGtleWZvcmNpY2Rub3RmcmVhbHByb2Q=   # dummy key for CI only
       DB_CONNECTION: sqlite
@@ -13,4 +12,4 @@ services:
       CACHE_STORE: array
       SESSION_DRIVER: array
       QUEUE_CONNECTION: sync
-    # no depends_on — tests use SQLite in-memory, no Postgres needed
+ 
